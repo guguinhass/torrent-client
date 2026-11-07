@@ -83,7 +83,7 @@ func New(peer peers.Peer, peerID, infohash [20]byre) (*Client, error){
 		Choked: true,
 		Bitfield: bf,
 		peer: peer,
-		infoHash; infohash,
+		infoHash: infohash,
 		peerID: peerID,
 	}, nil
 }
