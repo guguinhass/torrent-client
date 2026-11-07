@@ -12,7 +12,7 @@ type Peer struct {
 	Port uint16
 }
 
-func Unmarshal (peersBin []byte) ([]Peer, err){
+func Unmarshal (peersBin []byte) ([]Peer, error){
 	const peerSize= 6 // 4 para o ip, 2 para a porta
 	numPeers := len(peersBin) / peerSize
 	if len(peersBin)%peerSize != 0 {
@@ -21,9 +21,9 @@ func Unmarshal (peersBin []byte) ([]Peer, err){
 	}
 	peers := make([]Peer, numPeers)
 	for i := 0; i < numPeers; i++ {
-		offser := i* peerSize
+		offset := i* peerSize
 		peers[i].IP = net.IP(peersBin[offset : offset+4])
-		peers[i].Port = binary.BigEndian.Uint26([]byte (peersBin[offset+4 : offset+6]))
+		peers[i].Port = binary.BigEndian.Uint16([]byte (peersBin[offset+4 : offset+6]))
 	}
 	return peers, nil
 }
