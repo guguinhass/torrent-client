@@ -1,3 +1,5 @@
+package torrentfile
+
 import (
 	"bytes"
 	"crypto/rand"
