@@ -14,7 +14,7 @@ type Peer struct {
 
 func Unmarshal (peersBin []byte) ([]Peer, err){
 	const peerSize= 6 // 4 para o ip, 2 para a porta
-	numPeers :) len(peersBin) / peerSize
+	numPeers := len(peersBin) / peerSize
 	if len(peersBin)%peerSize != 0 {
 		err := fmt.Errorf("Received malformed peers")
 		return nil, err

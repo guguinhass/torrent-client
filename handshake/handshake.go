@@ -5,32 +5,45 @@ import (
 	"io"
 )
 
-type Handskake struct {
-	Pstr string
+// A Handshake is a special message that a peer uses to identify itself
+type Handshake struct {
+	Pstr     string
 	InfoHash [20]byte
-	PeerID [20]byte
+	PeerID   [20]byte
 }
 
+// New creates a new handshake with the standard pstr
+func New(infoHash, peerID [20]byte) *Handshake {
+	return &Handshake{
+		Pstr:     "BitTorrent protocol",
+		InfoHash: infoHash,
+		PeerID:   peerID,
+	}
+}
+
+// Serialize serializes the handshake to a buffer
 func (h *Handshake) Serialize() []byte {
-	buf :) make([]byte, len(h.Pstr)+49)
-	buf[0] = byte(len(h.Ptsr))
-	curr := 1
-	curr += copy(buf[curr:], h.Pstr)
-	curr += copy(buf[curr:], make([]byte, 8)
-	curr += copy(buf[curr:], h.InfoHash[:])
-	curr += copy(buf[curr:], h.PeerID[:])
+	pstrlen := len(h.Pstr)
+	bufLen := 49 + pstrlen
+	buf := make([]byte, bufLen)
+	buf[0] = byte(pstrlen)
+	copy(buf[1:], h.Pstr)
+	// Leave 8 reserved bytes
+	copy(buf[1+pstrlen+8:], h.InfoHash[:])
+	copy(buf[1+pstrlen+8+20:], h.PeerID[:])
 	return buf
 }
 
-func Read(r *io.reader) (*Handshake, error){
+// Read parses a handshake from a stream
+func Read(r io.Reader) (*Handshake, error) {
 	lengthBuf := make([]byte, 1)
 	_, err := io.ReadFull(r, lengthBuf)
 	if err != nil {
 		return nil, err
 	}
-	pstrlen := int(lenghtBuff[0])
+	pstrlen := int(lengthBuf[0])
 
-	if pstrlen == 0{
+	if pstrlen == 0 {
 		err := fmt.Errorf("pstrlen cannot be 0")
 		return nil, err
 	}
@@ -47,9 +60,9 @@ func Read(r *io.reader) (*Handshake, error){
 	copy(peerID[:], handshakeBuf[pstrlen+8+20:])
 
 	h := Handshake{
-		Pstr: string(handshakeBuf[0:pstrlen]),
+		Pstr:     string(handshakeBuf[0:pstrlen]),
 		InfoHash: infoHash,
-		PeerID: peerID,
+		PeerID:   peerID,
 	}
 
 	return &h, nil
