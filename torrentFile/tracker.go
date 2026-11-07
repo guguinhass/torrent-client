@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-	"github.com/guguinhass/torrentClient/peers"
+	"github.com/guguinhass/torrent-client/peers"
 	"github.com/jackpal/bencode-go"
 )
 

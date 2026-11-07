@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"os"
-	"github.com/guguinhass/torrent-client/torrentfile"
+	"github.com/guguinhass/torrent-client/torrentFile"
 )
 
 func main() {
