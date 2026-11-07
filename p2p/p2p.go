@@ -13,64 +13,67 @@ import (
 	"github.com/guguinhass/torrent-client/peers"
 )
 
+// MaxBlockSize is the largest number of bytes a request can ask for
 const MaxBlockSize = 16384
 
-const MaxBackLog = 5
+// MaxBacklog is the number of unfulfilled requests a client can have in its pipeline
+const MaxBacklog = 5
 
+// Torrent holds data required to download a torrent from a list of peers
 type Torrent struct {
-	Peers []peers.Peer
-	PeerID [20]byte
-	InfoHash [20]byte
-	PiecesHash [][20]byte
+	Peers       []peers.Peer
+	PeerID      [20]byte
+	InfoHash    [20]byte
+	PieceHashes [][20]byte
 	PieceLength int
-	Length int
-	Name string
+	Length      int
+	Name        string
 }
 
-type pieceWork struct{
-	index int
-	hash [20]byte
+type pieceWork struct {
+	index  int
+	hash   [20]byte
 	length int
 }
 
-type pieceResult struct{
+type pieceResult struct {
 	index int
-	buf []byte
+	buf   []byte
 }
 
-type pieceProgress struct{
-	index int
-	client *client.Client
-	buf []byte
+type pieceProgress struct {
+	index      int
+	client     *client.Client
+	buf        []byte
 	downloaded int
-	requested int
-	backlog int
+	requested  int
+	backlog    int
 }
 
-func (state *pieceProgress) readMessage() error{
-	msg.err := state.client.Read()
+func (state *pieceProgress) readMessage() error {
+	msg, err := state.client.Read() // this call blocks
 	if err != nil {
+		return err
+	}
+
+	if msg == nil { // keep-alive
 		return nil
 	}
 
-	if msg == nil {
-		return nil
-	}
-
-	switch msg.ID{
+	switch msg.ID {
 	case message.MsgUnchoke:
-		state.client.Choked=false
+		state.client.Choked = false
 	case message.MsgChoke:
 		state.client.Choked = true
 	case message.MsgHave:
 		index, err := message.ParseHave(msg)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 		state.client.Bitfield.SetPiece(index)
 	case message.MsgPiece:
-		n, err := message.ParsrePiece(state.index, state.buf, msg)
-		if err != nil{
+		n, err := message.ParsePiece(state.index, state.buf, msg)
+		if err != nil {
 			return err
 		}
 		state.downloaded += n
@@ -78,7 +81,6 @@ func (state *pieceProgress) readMessage() error{
 	}
 	return nil
 }
-
 
 func attemptDownloadPiece(c *client.Client, pw *pieceWork) ([]byte, error) {
 	state := pieceProgress{
@@ -119,7 +121,6 @@ func attemptDownloadPiece(c *client.Client, pw *pieceWork) ([]byte, error) {
 
 	return state.buf, nil
 }
-
 
 func checkIntegrity(pw *pieceWork, buf []byte) error {
 	hash := sha1.Sum(buf)
@@ -214,4 +215,3 @@ func (t *Torrent) Download() ([]byte, error) {
 
 	return buf, nil
 }
-

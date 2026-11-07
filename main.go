@@ -11,7 +11,7 @@ func main() {
 	outPath := os.Args[2]
 
 	tf, err := torrentfile.Open(inPath)
-	if errr != nil{
+	if err != nil{
 		log.Fatal(err)
 	}
 
